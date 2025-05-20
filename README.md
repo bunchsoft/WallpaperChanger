@@ -20,12 +20,26 @@ A macOS menu bar application that automatically changes your desktop wallpaper a
 1. Clone this repository
 2. Open Terminal and navigate to the project directory
 3. Build the application:
+
+    #### Option A: Build as Command Line Tool
+
     ```
     cd WallpaperChanger
-    swift build -c release
+    ./build.sh
     ```
-4. The built application will be in `.build/release/WallpaperChanger`
-5. Copy the application to your Applications folder or run it directly
+
+    The built application will be in the project directory as `WallpaperChanger`
+
+    #### Option B: Build as macOS App Bundle
+
+    ```
+    cd WallpaperChanger
+    ./build_app.sh
+    ```
+
+    The built application will be in `build/WallpaperChanger.app`
+
+4. Copy the application to your Applications folder or run it directly
 
 ### Option 2: Download Release
 

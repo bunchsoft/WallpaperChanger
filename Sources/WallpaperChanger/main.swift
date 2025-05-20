@@ -1,16 +1,12 @@
 import Cocoa
-import SwiftUI
 import Foundation
 
-struct WallpaperChangerApp: App {
-    @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
-    var body: some Scene {
-        // No visible windows for this app, it's menu bar only
-        Settings { EmptyView() }
-            .commands { CommandGroup(replacing: .appSettings) { EmptyView() } }
-    }
-}
+// Create a strong reference to the app delegate
+let appDelegate = AppDelegate()
+NSApplication.shared.delegate = appDelegate
+
+// Start the application
+_ = NSApplicationMain(CommandLine.argc, CommandLine.unsafeArgv)
 
 class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem: NSStatusItem!
