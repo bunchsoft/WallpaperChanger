@@ -31,6 +31,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // Set as accessory app (menu bar only)
     NSApp.setActivationPolicy(.accessory)
 
+    // Build a bare-bones Main Menu so that Edit→Select All, Copy, Paste, etc. actually exist.
+    let mainMenu = NSMenu()
+
+    // 1) Application menu (with Quit…)
+    let appMenuItem = NSMenuItem()
+    mainMenu.addItem(appMenuItem)
+    let appMenu = NSMenu(title: "App")
+    appMenuItem.submenu = appMenu
+    appMenu.addItem(
+      withTitle: "Quit Wallpaper Changer",
+      action: #selector(NSApplication.terminate(_:)),
+      keyEquivalent: "q"
+    )
+
+    // 2) Edit menu (with Select All)
+    let editMenuItem = NSMenuItem()
+    mainMenu.addItem(editMenuItem)
+    let editMenu = NSMenu(title: "Edit")
+    editMenuItem.submenu = editMenu
+    editMenu.addItem(
+      withTitle: "Select All",
+      action: #selector(NSText.selectAll(_:)),
+      keyEquivalent: "a"
+    )
+    editMenu.addItem(
+      withTitle: "Copy",
+      action: #selector(NSText.copy(_:)),
+      keyEquivalent: "c"
+    )
+    editMenu.addItem(
+      withTitle: "Paste",
+      action: #selector(NSText.paste(_:)),
+      keyEquivalent: "v"
+    )
+
+    NSApp.mainMenu = mainMenu
+
     // Close any windows that might have been created
     NSApp.windows.forEach { $0.close() }
 
@@ -151,13 +188,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Check if the URL has changed since last time
         if urlString == lastResolvedImageUrl {
-          // For static URLs and JSON API, skip if unchanged
-          switch currentSource {
-          case .staticUrl, .jsonApi:
+          // Skip for JSON API source only if the URL is unchanged
+          if case .jsonApi = currentSource {
             print("Image URL unchanged, skipping download")
             return
-          default:
-            break
           }
         }
 
@@ -257,6 +291,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     let selectorField = NSTextField(frame: NSRect(x: 0, y: 0, width: 300, height: 24))
     selectorField.placeholderString = "JSON Path (e.g., data.url)"
+    selectorField.font = NSFont.monospacedSystemFont(ofSize: 12, weight: .regular)
 
     if case .jsonApi(let url, let selector) = currentSource {
       urlField.stringValue = url
