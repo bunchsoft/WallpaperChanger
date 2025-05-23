@@ -34,13 +34,15 @@ if [ $? -eq 0 ]; then
     echo -e "${YELLOW}You can run the application with:${NC}"
     echo -e "${GREEN}./WallpaperChanger${NC}"
     
-    # Ask if user wants to run the application
-    echo -e "${YELLOW}Do you want to run the application now? (y/n)${NC}"
-    read -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        echo -e "${YELLOW}Running WallpaperChanger...${NC}"
-        ./WallpaperChanger
+    # Only ask to run the application if not in CI environment
+    if [ -z "$CI" ]; then
+        echo -e "${YELLOW}Do you want to run the application now? (y/n)${NC}"
+        read -n 1 -r
+        echo
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo -e "${YELLOW}Running WallpaperChanger...${NC}"
+            ./WallpaperChanger
+        fi
     fi
 else
     echo -e "${RED}Build failed.${NC}"

@@ -65,11 +65,13 @@ echo -e "${YELLOW}You can run the application by double-clicking it in Finder${N
 echo -e "${YELLOW}or by running:${NC}"
 echo -e "${GREEN}open ${APP_BUNDLE}${NC}"
 
-# Ask if user wants to run the application
-echo -e "${YELLOW}Do you want to run the application now? (y/n)${NC}"
-read -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo -e "${YELLOW}Running ${APP_NAME}...${NC}"
-    open "${APP_BUNDLE}"
+# Only ask to run the application if not in CI environment
+if [ -z "$CI" ]; then
+    echo -e "${YELLOW}Do you want to run the application now? (y/n)${NC}"
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        echo -e "${YELLOW}Running ${APP_NAME}...${NC}"
+        open "${APP_BUNDLE}"
+    fi
 fi

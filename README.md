@@ -43,10 +43,52 @@ A macOS menu bar application that automatically changes your desktop wallpaper a
 
 ### Option 2: Download Release
 
-1. Download the latest release from the Releases page
+1. Download the latest release from the [Releases page](https://github.com/yourusername/WallpaperChanger/releases)
 2. Extract the zip file
 3. Move WallpaperChanger.app to your Applications folder
 4. Launch the application
+
+## Development
+
+### Continuous Integration and Deployment
+
+This project uses GitHub Actions for continuous integration and automated releases:
+
+-   Every push to the `main` branch triggers a build of the application
+-   Creating a new tag (e.g., `v1.0.0`) automatically:
+    -   Builds the application
+    -   Creates a GitHub release
+    -   Attaches the built application as a downloadable asset
+
+### Creating a New Release
+
+#### Option 1: Using the Release Script (Recommended)
+
+The easiest way to create a new release is to use the provided script:
+
+```bash
+./create_release.sh 1.0.0
+```
+
+Replace `1.0.0` with your desired version number. The script will:
+
+1. Update the version in `Sources/WallpaperChanger/Info.plist`
+2. Commit the changes
+3. Create and push a tag (e.g., `v1.0.0`)
+4. GitHub Actions will automatically build and publish the release
+
+#### Option 2: Manual Process
+
+If you prefer to create a release manually:
+
+1. Update the version in `Sources/WallpaperChanger/Info.plist`
+2. Commit your changes to the `main` branch
+3. Create and push a new tag:
+    ```
+    git tag v1.0.0
+    git push origin v1.0.0
+    ```
+4. GitHub Actions will automatically build and publish the release
 
 ## Usage
 
