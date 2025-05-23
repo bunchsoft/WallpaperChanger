@@ -57,6 +57,34 @@ cp "Sources/${APP_NAME}/${APP_NAME}.entitlements" "${CONTENTS_DIR}/"
 # Create PkgInfo file
 echo "APPL????" > "${CONTENTS_DIR}/PkgInfo"
 
+# Process and copy app icon
+echo -e "${YELLOW}Processing app icon...${NC}"
+ICON_PATH="assets/appicon.png"
+ICONSET_DIR="${RESOURCES_DIR}/appicon.iconset"
+ICNS_FILE="${RESOURCES_DIR}/appicon.icns"
+
+# Create iconset directory
+mkdir -p "${ICONSET_DIR}"
+
+# Generate different icon sizes using sips
+for size in 16 32 64 128 256 512; do
+    # Standard resolution
+    sips -z $size $size "${ICON_PATH}" --out "${ICONSET_DIR}/icon_${size}x${size}.png" > /dev/null 2>&1
+    
+    # High resolution (2x)
+    if [ $size -le 256 ]; then
+        sips -z $(($size*2)) $(($size*2)) "${ICON_PATH}" --out "${ICONSET_DIR}/icon_${size}x${size}@2x.png" > /dev/null 2>&1
+    fi
+done
+
+# Convert iconset to icns file
+iconutil -c icns "${ICONSET_DIR}" -o "${ICNS_FILE}"
+
+# Clean up temporary iconset directory
+rm -rf "${ICONSET_DIR}"
+
+echo -e "${GREEN}App icon processed and added to the bundle${NC}"
+
 # Set executable permissions
 chmod +x "${MACOS_DIR}/${APP_NAME}"
 
