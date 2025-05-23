@@ -19,7 +19,7 @@ This project was an example trying to build a simple "vibe coded" application.
 
 ### Option 1: Download Release
 
-1. Download the latest release from the [Releases page](https://github.com/yourusername/WallpaperChanger/releases)
+1. Download the latest release from the [Releases page](https://github.com/bunchsoft/WallpaperChanger/releases)
 2. Extract the zip file
 3. Move WallpaperChanger.app to your Applications folder
 4. Launch the application
