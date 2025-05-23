@@ -1,6 +1,6 @@
 # Wallpaper Changer
 
-A macOS menu bar application that automatically changes your desktop wallpaper at customizable intervals.
+A macOS menu bar application that automatically changes your desktop wallpaper at customizable intervals. [Download the latest here](https://github.com/bunchsoft/WallpaperChanger/releases)
 
 This project was an example trying to build a simple "vibe coded" application.
 
