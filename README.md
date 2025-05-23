@@ -2,6 +2,8 @@
 
 A macOS menu bar application that automatically changes your desktop wallpaper at customizable intervals.
 
+This project was an example trying to build a simple "vibe coded" application.
+
 ## Features
 
 -   🖼️ Automatically changes your desktop wallpaper at customizable intervals
@@ -15,7 +17,14 @@ A macOS menu bar application that automatically changes your desktop wallpaper a
 
 ## Installation
 
-### Option 1: Build from Source
+### Option 1: Download Release
+
+1. Download the latest release from the [Releases page](https://github.com/yourusername/WallpaperChanger/releases)
+2. Extract the zip file
+3. Move WallpaperChanger.app to your Applications folder
+4. Launch the application
+
+### Option 2: Build from Source
 
 1. Clone this repository
 2. Open Terminal and navigate to the project directory
@@ -40,13 +49,6 @@ A macOS menu bar application that automatically changes your desktop wallpaper a
     The built application will be in `build/WallpaperChanger.app`
 
 4. Copy the application to your Applications folder or run it directly
-
-### Option 2: Download Release
-
-1. Download the latest release from the [Releases page](https://github.com/yourusername/WallpaperChanger/releases)
-2. Extract the zip file
-3. Move WallpaperChanger.app to your Applications folder
-4. Launch the application
 
 ## Development
 
@@ -124,9 +126,17 @@ The app supports three types of wallpaper sources:
     - The image will be used as your wallpaper
 
 3. **JSON API**
+
     - Enter an API URL that returns JSON
     - Specify a JSON path to extract the image URL
     - Example: If your API returns `{"data": {"imageUrl": "https://example.com/image.jpg"}}`, use the JSON path `data.imageUrl`
+
+    - **Unsplash API Example**:
+        1. Create an application at [Unsplash Developers](https://unsplash.com/oauth/applications)
+        2. Use a URL like: `https://api.unsplash.com/photos/random?orientation=landscape&client_id=YOUR_CLIENT_ID_HERE`
+        3. Set the JSON path to `urls.full` or `urls.regular`
+
+![alt text](./assets/unsplash-example.png)
 
 ## Requirements
 
