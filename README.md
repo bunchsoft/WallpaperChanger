@@ -1,6 +1,6 @@
 # Wallpaper Changer
 
-A macOS menu bar application that automatically changes your desktop wallpaper at customizable intervals. [Download the latest here](https://github.com/bunchsoft/WallpaperChanger/releases/latest) (see below if the app fails to launch).
+A macOS menu bar application that automatically changes your desktop wallpaper at customizable intervals. [Available on the App Store](https://apps.apple.com/app/wallpaper-changer-from-url-api/id6746328538)!
 
 This project was an example trying to build a simple "vibe coded" application.
 
@@ -17,7 +17,12 @@ This project was an example trying to build a simple "vibe coded" application.
 
 ## Installation
 
-### Option 1: Download Release
+### Option 1: Download from App Store
+
+1. Download the latest release from the [App Store](https://apps.apple.com/app/wallpaper-changer-from-url-api/id6746328538)
+2. Launch the application
+
+### Option 2: Download Release from GitHub
 
 1. Download the latest release from the [Releases page](https://github.com/bunchsoft/WallpaperChanger/releases)
 2. Extract the zip file
@@ -25,7 +30,7 @@ This project was an example trying to build a simple "vibe coded" application.
 4. Run `xattr -d com.apple.quarantine /Applications/WallpaperChanger.app` in Terminal
 5. Launch the application
 
-### Option 2: Build from Source
+### Option 3: Build from Source
 
 1. Clone this repository
 2. Open Terminal and navigate to the project directory

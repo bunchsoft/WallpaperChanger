@@ -19,7 +19,7 @@ fi
 
 # App name and bundle identifier
 APP_NAME="WallpaperChanger"
-BUNDLE_ID="com.example.WallpaperChanger"
+BUNDLE_ID="software.bunch.WallpaperChanger"
 
 # Build the application in release mode
 echo -e "${YELLOW}Compiling...${NC}"
@@ -72,10 +72,12 @@ for size in 16 32 64 128 256 512; do
     sips -z $size $size "${ICON_PATH}" --out "${ICONSET_DIR}/icon_${size}x${size}.png" > /dev/null 2>&1
     
     # High resolution (2x)
-    if [ $size -le 256 ]; then
-        sips -z $(($size*2)) $(($size*2)) "${ICON_PATH}" --out "${ICONSET_DIR}/icon_${size}x${size}@2x.png" > /dev/null 2>&1
-    fi
+    sips -z $(($size*2)) $(($size*2)) "${ICON_PATH}" --out "${ICONSET_DIR}/icon_${size}x${size}@2x.png" > /dev/null 2>&1
 done
+
+# Ensure we have the 1024x1024 icon (512x512@2x) required by App Store
+sips -z 1024 1024 "${ICON_PATH}" --out "${ICONSET_DIR}/icon_512x512@2x.png" > /dev/null 2>&1
+echo -e "${YELLOW}Created 512x512@2x (1024x1024) icon required by App Store${NC}"
 
 # Convert iconset to icns file
 iconutil -c icns "${ICONSET_DIR}" -o "${ICNS_FILE}"

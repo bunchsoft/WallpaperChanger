@@ -22,11 +22,11 @@ Icon
 **/xcshareddata/WorkspaceSettings.xcsettings
 
 # Build artifacts
-/WallpaperChanger
 *.app
 *.ipa
 *.dSYM.zip
 *.dSYM
+/build
 
 # Logs
 *.log

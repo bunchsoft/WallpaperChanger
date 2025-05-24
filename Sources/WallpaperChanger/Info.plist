@@ -2,31 +2,33 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleIdentifier</key>
-    <string>com.example.WallpaperChanger</string>
-    <key>CFBundleName</key>
-    <string>WallpaperChanger</string>
-    <key>CFBundleDisplayName</key>
-    <string>Wallpaper Changer</string>
-    <key>CFBundleVersion</key>
-    <string>1.0.1</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0.1</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleExecutable</key>
-    <string>WallpaperChanger</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>12.0</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSHumanReadableCopyright</key>
-    <string>Copyright © 2025. All rights reserved.</string>
-    <key>NSPrincipalClass</key>
-    <string>NSApplication</string>
-    <key>NSSupportsAutomaticGraphicsSwitching</key>
-    <true/>
-    <key>CFBundleIconFile</key>
-    <string>appicon</string>
+	<key>CFBundleDisplayName</key>
+	<string>Wallpaper Changer</string>
+	<key>CFBundleExecutable</key>
+	<string>WallpaperChanger</string>
+	<key>CFBundleIconFile</key>
+	<string>appicon</string>
+	<key>CFBundleIdentifier</key>
+	<string>software.bunch.WallpaperChanger</string>
+	<key>CFBundleName</key>
+	<string>WallpaperChanger</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.0.4</string>
+	<key>CFBundleVersion</key>
+	<string>1.0.4</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.utilities</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>12.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2025. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSSupportsAutomaticGraphicsSwitching</key>
+	<true/>
 </dict>
 </plist>
