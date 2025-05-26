@@ -2,6 +2,7 @@ import Cocoa
 import Foundation
 import ServiceManagement
 import UserNotifications
+import CommonCrypto
 
 #if canImport(ServiceManagement)
   import ServiceManagement
@@ -28,8 +29,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   // Path to the current wallpaper temporary file
   private var currentWallpaperPath: URL?
   
-  // Flag to track if notifications are authorized
+  // Hash of the current wallpaper for change detection
+  private var currentWallpaperHash: String?
+  
+  // Flags to track notification status
   private var notificationsAuthorized = false
+  private var showMessagesEnabled = false
 
   // UserDefaults keys
   private let kRefreshIntervalKey = "refreshInterval"
@@ -38,7 +43,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   private let kJsonApiUrlKey = "jsonApiUrl"
   private let kJsonSelectorKey = "jsonSelector"
   private let kLastResolvedImageUrlKey = "lastResolvedImageUrl"
+  private let kLastWallpaperHashKey = "lastWallpaperHash"
   private let kRunAtLoginKey = "runAtLogin"
+  private let kShowMessagesEnabledKey = "showMessagesEnabled"
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     // Set as accessory app (menu bar only)
@@ -192,6 +199,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       keyEquivalent: "")
     runAtLoginItem.state = isRunAtLoginEnabled() ? .on : .off
     menu.addItem(runAtLoginItem)
+    
+    // Show messages option
+    let messagesItem = NSMenuItem(
+      title: "Notify on Wallpaper Change",
+      action: #selector(toggleShowMessages(_:)),
+      keyEquivalent: "")
+    messagesItem.state = showMessagesEnabled ? .on : .off
+    menu.addItem(messagesItem)
 
     menu.addItem(NSMenuItem.separator())
 
@@ -444,9 +459,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // Store the path to the current wallpaper
     currentWallpaperPath = tempFileURL
-
+    
+    // Calculate hash of the wallpaper
+    let newHash = calculateFileHash(fileURL: tempFileURL)
+    
+    // Check if wallpaper has changed by comparing hashes
+    let wallpaperChanged = currentWallpaperHash != newHash
+    
+    // Update current hash
+    currentWallpaperHash = newHash
+    
+    // Save the hash to UserDefaults
+    UserDefaults.standard.set(newHash, forKey: kLastWallpaperHashKey)
+    
     // Set as desktop wallpaper
     try NSWorkspace.shared.setDesktopImageURL(tempFileURL, for: NSScreen.main!, options: [:])
+    
+    // Show notification if wallpaper has changed (and it's not the first run)
+    if wallpaperChanged && UserDefaults.standard.object(forKey: kLastWallpaperHashKey) != nil {
+      // Show notification on the main thread
+      await MainActor.run {
+        self.showSuccessMessage(message: "Wallpaper has been updated", title: "Wallpaper Changed")
+      }
+    }
   }
   
   @objc func saveCurrentWallpaper() {
@@ -483,8 +518,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
       // Copy the file to the Downloads directory
       try FileManager.default.copyItem(at: currentWallpaperPath, to: destinationURL)
       
-      // Show success message
-      self.showSuccessMessage(message: "Current wallpaper saved to Downloads folder", title: "Wallpaper Saved")
+      // Always show success message for saves, regardless of message preference
+      self.alwaysShowMessage(message: "Current wallpaper saved to Downloads folder", title: "Wallpaper Saved")
     } catch {
       // Show an alert if the save fails
       let alert = NSAlert()
@@ -496,8 +531,69 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  // Helper method to show success message either as notification or alert
+  // Calculate a simple hash of a file based on its size and modification date
+  private func calculateFileHash(fileURL: URL) -> String {
+    do {
+      let attributes = try FileManager.default.attributesOfItem(atPath: fileURL.path)
+      let fileSize = attributes[.size] as? UInt64 ?? 0
+      let modificationDate = attributes[.modificationDate] as? Date ?? Date()
+      
+      // Create a hash from the file size and modification date
+      let hashString = "\(fileSize)-\(modificationDate.timeIntervalSince1970)"
+      return hashString
+    } catch {
+      print("Error calculating file hash: \(error.localizedDescription)")
+      return UUID().uuidString // Fallback to a random string if hash calculation fails
+    }
+  }
+  
+  @objc func toggleShowMessages(_ sender: NSMenuItem) {
+    // Toggle the state
+    showMessagesEnabled = !showMessagesEnabled
+    
+    // Update the menu item state
+    sender.state = showMessagesEnabled ? .on : .off
+    
+    // Save the preference
+    UserDefaults.standard.set(showMessagesEnabled, forKey: kShowMessagesEnabledKey)
+    UserDefaults.standard.synchronize()
+  }
+  
+  // Helper method to always show a message, regardless of user preference
+  private func alwaysShowMessage(message: String, title: String) {
+    if notificationsAuthorized {
+      // Show a success notification using UserNotifications framework
+      let content = UNMutableNotificationContent()
+      content.title = title
+      content.body = message
+      content.sound = UNNotificationSound.default
+      
+      let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+      UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+          print("Error showing notification: \(error.localizedDescription)")
+          
+          // Fall back to alert if notification fails
+          DispatchQueue.main.async {
+            self.showSuccessAlert(message: message, title: title)
+          }
+        }
+      }
+    } else {
+      // Fall back to alert if notifications aren't authorized
+      DispatchQueue.main.async {
+        self.showSuccessAlert(message: message, title: title)
+      }
+    }
+  }
+  
+  // Helper method to show success message either as notification or alert, respecting user preference
   private func showSuccessMessage(message: String, title: String) {
+    // Only show messages if enabled
+    if !showMessagesEnabled {
+      return
+    }
+    
     if notificationsAuthorized {
       // Show a success notification using UserNotifications framework
       let content = UNMutableNotificationContent()
@@ -707,5 +803,11 @@ extension AppDelegate {
 
     // Load last resolved image URL
     lastResolvedImageUrl = defaults.string(forKey: kLastResolvedImageUrlKey)
+    
+    // Load last wallpaper hash
+    currentWallpaperHash = defaults.string(forKey: kLastWallpaperHashKey)
+    
+    // Load show messages preference (default to false)
+    showMessagesEnabled = defaults.bool(forKey: kShowMessagesEnabledKey)
   }
 }
