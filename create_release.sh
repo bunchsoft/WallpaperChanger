@@ -43,48 +43,6 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
-# Update version in Info.plist
-echo -e "${YELLOW}Updating version in Info.plist...${NC}"
-INFO_PLIST="Sources/WallpaperChanger/Info.plist"
-
-if [ ! -f "$INFO_PLIST" ]; then
-    echo -e "${RED}Error: Info.plist not found at $INFO_PLIST${NC}"
-    exit 1
-fi
-
-# Update CFBundleVersion and CFBundleShortVersionString
-# Using awk for more reliable multi-line replacements
-awk -v ver="$VERSION" '
-/<key>CFBundleVersion<\/key>/ { print; getline; gsub(/>.*</, ">" ver "<"); print; next }
-/<key>CFBundleShortVersionString<\/key>/ { print; getline; gsub(/>.*</, ">" ver "<"); print; next }
-{ print }
-' "$INFO_PLIST" > "${INFO_PLIST}.tmp" && mv "${INFO_PLIST}.tmp" "$INFO_PLIST"
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Failed to update version in Info.plist${NC}"
-    exit 1
-fi
-
-# Verify the changes
-if ! grep -q "<string>${VERSION}</string>" "$INFO_PLIST"; then
-    echo -e "${RED}Error: Failed to update version in Info.plist. Version string not found.${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}Version updated in Info.plist${NC}"
-
-# Commit the changes
-echo -e "${YELLOW}Committing changes...${NC}"
-git add "$INFO_PLIST"
-git commit -m "Bump version to ${VERSION}"
-
-if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Failed to commit changes${NC}"
-    exit 1
-fi
-
-echo -e "${GREEN}Changes committed${NC}"
-
 # Create and push tag
 echo -e "${YELLOW}Creating and pushing tag v${VERSION}...${NC}"
 git tag "v${VERSION}"
