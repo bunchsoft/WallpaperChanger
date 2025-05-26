@@ -1,6 +1,7 @@
 import Cocoa
 import Foundation
 import ServiceManagement
+import UserNotifications
 
 #if canImport(ServiceManagement)
   import ServiceManagement
@@ -23,6 +24,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
   // Cache for last resolved image URL
   private var lastResolvedImageUrl: String?
+  
+  // Path to the current wallpaper temporary file
+  private var currentWallpaperPath: URL?
+  
+  // Flag to track if notifications are authorized
+  private var notificationsAuthorized = false
 
   // UserDefaults keys
   private let kRefreshIntervalKey = "refreshInterval"
@@ -36,6 +43,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   func applicationDidFinishLaunching(_ notification: Notification) {
     // Set as accessory app (menu bar only)
     NSApp.setActivationPolicy(.accessory)
+    
+    // Request notification permission
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { [weak self] granted, error in
+      if let error = error {
+        print("Error requesting notification authorization: \(error.localizedDescription)")
+      }
+      
+      // Store the authorization status
+      self?.notificationsAuthorized = granted
+      
+      if granted {
+        print("Notification permission granted")
+      } else {
+        print("Notification permission denied")
+      }
+    }
 
     // Build a bare-bones Main Menu so that Edit→Select All, Copy, Paste, etc. actually exist.
     let mainMenu = NSMenu()
@@ -100,6 +123,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     menu.addItem(
       NSMenuItem(
         title: "Refresh Wallpaper Now", action: #selector(refreshWallpaper), keyEquivalent: "r"))
+        
+    menu.addItem(
+      NSMenuItem(
+        title: "Save Current Wallpaper", action: #selector(saveCurrentWallpaper), keyEquivalent: "s"))
 
     menu.addItem(NSMenuItem.separator())
 
@@ -292,7 +319,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @objc func setJsonApi() {
     let alert = NSAlert()
     alert.alertStyle = .informational
-    alert.icon = NSImage(systemSymbolName: "doc.plaintext", accessibilityDescription: "JSON API")
     alert.messageText = "Configure JSON API"
     alert.informativeText = "Enter the API URL and JSON path to the image URL:"
 
@@ -415,12 +441,98 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     try jpegData.write(to: tempFileURL)
+    
+    // Store the path to the current wallpaper
+    currentWallpaperPath = tempFileURL
 
     // Set as desktop wallpaper
     try NSWorkspace.shared.setDesktopImageURL(tempFileURL, for: NSScreen.main!, options: [:])
-
+  }
+  
+  @objc func saveCurrentWallpaper() {
+    guard let currentWallpaperPath = currentWallpaperPath else {
+      // Show an alert if there's no current wallpaper
+      let alert = NSAlert()
+      alert.alertStyle = .warning
+      alert.messageText = "No Wallpaper Available"
+      alert.informativeText = "There is no current wallpaper to save."
+      alert.addButton(withTitle: "OK")
+      alert.runModal()
+      return
+    }
+    
+    // Get the Downloads directory
+    guard let downloadsURL = FileManager.default.urls(for: .downloadsDirectory, in: .userDomainMask).first else {
+      // Show an alert if we can't access the Downloads directory
+      let alert = NSAlert()
+      alert.alertStyle = .warning
+      alert.messageText = "Cannot Access Downloads Folder"
+      alert.informativeText = "Unable to access your Downloads folder."
+      alert.addButton(withTitle: "OK")
+      alert.runModal()
+      return
+    }
+    
+    // Create a filename with timestamp
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyyMMdd-HHmmss"
+    let timestamp = dateFormatter.string(from: Date())
+    let destinationURL = downloadsURL.appendingPathComponent("wallpaper-\(timestamp).jpg")
+    
+    do {
+      // Copy the file to the Downloads directory
+      try FileManager.default.copyItem(at: currentWallpaperPath, to: destinationURL)
+      
+      // Show success message
+      self.showSuccessMessage(message: "Current wallpaper saved to Downloads folder", title: "Wallpaper Saved")
+    } catch {
+      // Show an alert if the save fails
+      let alert = NSAlert()
+      alert.alertStyle = .warning
+      alert.messageText = "Save Failed"
+      alert.informativeText = "Failed to save wallpaper: \(error.localizedDescription)"
+      alert.addButton(withTitle: "OK")
+      alert.runModal()
+    }
   }
 
+  // Helper method to show success message either as notification or alert
+  private func showSuccessMessage(message: String, title: String) {
+    if notificationsAuthorized {
+      // Show a success notification using UserNotifications framework
+      let content = UNMutableNotificationContent()
+      content.title = title
+      content.body = message
+      content.sound = UNNotificationSound.default
+      
+      let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+      UNUserNotificationCenter.current().add(request) { error in
+        if let error = error {
+          print("Error showing notification: \(error.localizedDescription)")
+          
+          // Fall back to alert if notification fails
+          DispatchQueue.main.async {
+            self.showSuccessAlert(message: message, title: title)
+          }
+        }
+      }
+    } else {
+      // Fall back to alert if notifications aren't authorized
+      DispatchQueue.main.async {
+        self.showSuccessAlert(message: message, title: title)
+      }
+    }
+  }
+  
+  // Helper method to show success alert
+  private func showSuccessAlert(message: String, title: String) {
+    let alert = NSAlert()
+    alert.alertStyle = .informational
+    alert.messageText = title
+    alert.informativeText = message
+    alert.addButton(withTitle: "OK")
+    alert.runModal()
+  }
 }
 
 // MARK: - Supporting Types
